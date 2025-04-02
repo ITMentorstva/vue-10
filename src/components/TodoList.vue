@@ -30,6 +30,12 @@
       <option value="nebitan">Nebitan</option>
     </Field>
 
+    <Field name="board" as="select" v-model="board">
+      <option value="todo">Todo</option>
+      <option value="doing">Doing</option>
+      <option value="done">Done</option>
+    </Field>
+
     <button>Snimi zadatak</button>
   </Form>
 
@@ -60,9 +66,10 @@
 import { defineComponent } from "vue";
 import FormTaskType from "@/Types/FormTaskType";
 import {Form, Field, ErrorMessage} from "vee-validate";
-import {getAllTasks, saveTask, updateAllTasks } from "@/models/tasksModel";
+import {generateRandomId, getAllTasks, saveTask, updateAllTasks } from "@/models/tasksModel";
 import TaskType from "@/Types/TaskType";
 import {priorityOrder} from "@/Types/PriorityOrder";
+import { isIdUsed } from "@/helpers/idHelper";
 
 export default defineComponent({
     name: "TodoList",
@@ -73,12 +80,14 @@ export default defineComponent({
     },
     data(): FormTaskType {
       return {
+        id: '',
         title: '',
         description: '',
         dueDate: '',
         priority: null,
         tasks: [] as TaskType[],
         prioritySort: '',
+        board: null
       }
     },
 
@@ -118,11 +127,19 @@ export default defineComponent({
           return;
         }
 
+        let tempId = generateRandomId();
+
+        if(isIdUsed(tempId, this.tasks)) {
+          tempId = generateRandomId();
+        }
+
         const task = {
+          id: generateRandomId(),
           title: this.title,
           description: this.description,
           dueDate: this.dueDate,
-          priority: this.priority
+          priority: this.priority,
+          board: this.board,
         };
 
         this.tasks.push(task);
