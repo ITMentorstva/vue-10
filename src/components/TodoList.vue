@@ -8,7 +8,7 @@
         v-model="title"
         type="text"
         placeholder="Unesite naslov zadatka"
-        rules="required|min:3|startsWithCapital|minWords:5"
+        rules="required|min:3|startsWithCapital|minWords:2"
     ></Field>
     <ErrorMessage name="title"></ErrorMessage>
 
@@ -18,7 +18,7 @@
         v-model="description"
         type="text"
         placeholder="Unesite text zadatka"
-        rules="required|min:10|max:20"
+        rules="required|min:10|max:250"
     ></Field>
     <ErrorMessage name="description"></ErrorMessage>
 
@@ -51,6 +51,8 @@
 import { defineComponent } from "vue";
 import FormTaskType from "@/Types/FormTaskType";
 import {Form, Field, ErrorMessage} from "vee-validate";
+import {getAllTasks, saveTask, updateAllTasks } from "@/models/tasksModel";
+import TaskType from "@/Types/TaskType";
 
 export default defineComponent({
     name: "TodoList",
@@ -65,9 +67,23 @@ export default defineComponent({
         description: '',
         dueDate: '',
         priority: null,
-        tasks: []
+        tasks: [] as TaskType[]
       }
     },
+
+    beforeMount() {
+      this.tasks = getAllTasks() ?? [];
+    },
+
+    watch: {
+      tasks: {
+        handler(tasks: TaskType[]): void {
+          updateAllTasks(tasks);
+        },
+        deep: true
+      },
+    },
+
     methods: {
 
       addTask() {
@@ -79,15 +95,16 @@ export default defineComponent({
           return;
         }
 
-        this.tasks.push({
+        const task = {
           title: this.title,
           description: this.description,
           dueDate: this.dueDate,
           priority: this.priority
-        });
+        };
+
+        this.tasks.push(task);
 
         this.resetFields();
-
       },
 
       resetFields() {
